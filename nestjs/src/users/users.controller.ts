@@ -1,43 +1,43 @@
-import { Controller, Param, Body, Res, Get, Post, Put, Delete } from '@nestjs/common';
+import { Controller, UseGuards, HttpCode, HttpStatus, Param, Body, Request, Get, Post, Put, Delete } from '@nestjs/common';
 import { Response } from 'express';
 import { UserService } from './users.service';
-import { UserDto } from './dtos/user.dto';
 import { UpdateUserDto } from './dtos/updateUser.dto';
 import { UserPipe } from './pipes/user.pipe';
+import { CreateUserDto } from './dtos/createUser.dto';
+import { AuthGuard } from 'src/auth/auth.guard';
 
-@Controller('users')
+@Controller('user')
 export class UsersController {
   constructor(private readonly userService: UserService) { }
 
-  @Get()
+  @Get('all')
+  @UseGuards(AuthGuard)
   getAllUsers() {
     return this.userService.getAllUsers();
   }
 
   @Post()
-  createUser(@Body(new UserPipe()) UserDto: UserDto) {
+  createUser(@Body(new UserPipe()) UserDto: CreateUserDto) {
     this.userService.createUser(UserDto);
   }
 
-  @Post('auth')
-  authUser(@Body(new UserPipe()) userDto: UserDto): number {
-    return this.userService.authUser(userDto);
+  @Put()
+  @UseGuards(AuthGuard)
+  updateUser(@Request() req, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.updateUser(req.payload.email, updateUserDto);
   }
 
-  @Put(':token')
-  updateUser(@Param('token') token: number, @Body() updateUserDto: UpdateUserDto) {
-    this.userService.updateUser(token, updateUserDto);
+  @Delete()
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  deleteUser(@Request() req) {
+    return this.userService.deleteUser(req.payload.email);
   }
 
-  @Delete(':token')
-  deleteUser(@Param('token') token: number, @Res() res: Response) {
-    const deletedUser = this.userService.deleteUser(token);
-    res.status(deletedUser ? 200 : 400).send(deletedUser);
-  }
-
-  @Get(':token')
-  getUser(@Param('token') token: number, @Res() res: Response) {
-    const user = this.userService.getUser(token);
-    res.status(user ? 200 : 404).send(user);
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  getUser(@Request() req) {
+    return this.userService.getUser(req.payload.email);
   }
 }

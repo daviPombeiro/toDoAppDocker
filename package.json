@@ -9,6 +9,8 @@
         "up:back": "docker-compose up nestjs-app -V -d",
         "up:front": "docker-compose up vuejs-app -V -d",
         "create": "docker-compose build && docker-compose up -V -d",
+        "create:back": "docker-compose build nestjs-app && docker-compose up nestjs-app -V -d",
+        "create:front": "docker-compose build vuejs-app && docker-compose up vuejs-app -V -d",
         "build": "docker-compose build",
         "up": "docker-compose up -V -d",
         "start": "docker-compose start -D -d",
